@@ -1,0 +1,96 @@
+1st function:
+    initialise:
+        -This function has 2 main responsibilities: initializing the game and shuffling a list of possible moves.
+        -srand(time(NULL)) initializes a pseudo-random number generator based on the current time.
+        -A double while loop, using i and j, traverses the rows and columns. Each cell is set to ' '.
+        -The loop (i > 0) shuffles the indices of moves so that they are in a random order.
+            1. We start from the end of the array (i = SIDE * SIDE - 1).
+            2. Random indices (rand_index) are selected between 0 and i
+                (inclusive).
+            3. Swap the values of moves[i] with moves[rand_index].
+            4. Decrease i and repeat until all the positions are shuffled.
+        -The algorithm ensures that each permutation of moves is equally probable
+            (Fisher-Yates Shuffle). This is especially useful for the first move.
+
+2nd function:
+    is_move_left:
+        -This function checks if there are any remaining valid moves on the game board by traversing all the cells and looking for an empty cell, represented by '_'.
+
+3rd function:
+    evaluation:
+        -This function calculates an evaluation of the game board (b) based on
+            the current state of the game. It is used to assess whether a player is in a winning, losing position, or if the game is undecided.
+        -The while(row < SIZE) loop traverses each row of the board. If all
+            elements in a row are identical and not empty:
+            1. Returns +10 if it is a winning row for the player.
+            2. Returns -10 if it is a winning row for the opponent.
+        -The while (col < SIZE) loop does the same but for columns.
+        -The two if conditions check the two main diagonals.
+        -Returns 0 if no winner is detected.
+
+4th function:
+    minimax:
+
+    -This function implements the Minimax algorithm, used to determine the
+        best move.
+    -Parameters: board, depth which represents the current level of depth in
+        the search tree. The higher the depth, the further into the future of the game we are looking.
+    -The first three conditions check if a player has won.
+    -The maximizer (is_max == true) tries to get the best possible evaluation.
+    -For each empty cell '_':
+        1. It plays the move (board[i][j] = player).
+        2. Recursively calls minimax for the next level with the reversed role
+            (!is_max).
+        3. Restores the original state of the cell (board[i][j] = '_').
+        4. Updates the best score (best) if the current move improves the
+            situation.
+    -The minimizer (is_max == false) tries to make the situation ask
+        unfavorable as possible for the maximizer.
+    -The function is similar to the maximizer, but here it minimizes the value
+        of best.
+    -Principle: Minimax explores all possible move combinations until a
+        terminal state (win, lose, draw). It then backtracks to calculate the scores of intermediate states and chooses the best path for the active player. At each level, Minimax simulates a move and recursively calls for the next move.
+    -Extra information (for me): depth represents the history of moves made
+        since the initial state of the game. The depth starts at 0 and increases by 1 with each recursive call.
+
+5th function:
+    play_tictac:
+        -This function manages the game flow.
+        -The while (!game_over(board) && move_index != SIDE * SIDE) loop
+            continues until the game is over or a draw.
+            1. !game_over(board) checks if the game is over.
+            2. move_index != SIDE * SIDE ensures that the number of moves
+                hasn't exceeded the number of cells. (Otherwise, it’s a draw).
+        -The if (whose_turn == COMPUTER) block starts the computer’s turn.
+            1. The board is transformed. The board is copied into temp_board,
+                replacing 'X' and 'O' with 'x' and 'o'. This allows the find_best_move function to work with a board of lowercase characters.
+            2. The best move for the computer is calculated using
+                find_best_move(temp_board), which uses Minimax to determine the best move for the computer.
+            3. The computer places its move on the board and show_board(board)
+                is called to display the new board after this move.
+            4. The turn is updated. After the computer plays, the turn
+                switches to the player.
+        -The else if (whose_turn == HUMAN) block starts the player’s turn.
+            1. The player is asked for a move. The player enters a move
+                between 1 and 9. The code checks if the move is valid and if the chosen cell is empty (board[x][y] == '_').
+            2. The input is converted into row and column indices.
+                1- x = (moves - 1) / SIDE determines the row.
+                2- y = (moves - 1) % SIDE determines the column.
+            3. The move is validated. If the cell is empty, the player places
+                their move. Otherwise, a message is displayed indicating that the cell is occupied.
+            4. The end of the game is checked. If a winner is found after the
+                move, the function declare_winner(HUMAN) is called to announce the human player's victory.
+            5. The turn switches to the computer.
+
+6th function:
+    find_best_move:
+        -best_val will be used to store the maximum value of the possible
+            moves for the computer. It is initialized to a very low value (-1000), as the computer seeks to maximize this value.
+        -best_move is a structure used to store the best move found. It
+            contains two fields (row, col) representing the coordinates of the best move.
+        -The function traverses each cell.
+            1. move_val = minimax(board, 0, false); After playing in the cell,
+                Minimax is called to evaluate the move. The depth of the search is initialized to 0, and false indicates that it’s now the human player’s turn.
+        -Updating the best move:
+            1. if (move_val > best_val), If the value of the current move
+                (move_val) is better than the best value found so far, then this move becomes the best move.

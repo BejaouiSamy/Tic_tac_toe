@@ -1,0 +1,114 @@
+1er fonction :
+	initialise :
+		-Cette fonction a 2 responsabilites principales : 
+			initialiser le jeu et melanger une liste de 
+			mouvement possible.
+		-srand(time(NULL)) initialise un generateur de nombre
+			pseudo-aleatoire basee sur l'heure actuelle.
+		-Double boucle while, i et j pour parcourir les lignes
+			et les colonnes. chaque celle est mise a ' '.
+		-La boucle (i > 0) melange les indices de moves pour
+			qu'ils soient dans un ordre aleatoire.
+			1. On commence a la fin du tableau (i = SIDE * SIDE - 1).
+			2. Selection des index aleatoire (rand_index) entre 0 et i
+				(inclus).
+			3. Echange la valeur des moves[i] avec celle de moves[rand_index].
+			4. diminue i et repete jusqu'a ce que toutes les cases soient
+				melangees.
+			L'algorithme garantit que chaque permutation de moves est probable.
+			(Fisher-Yates Shuffle). Surtout utile pour le premier move.
+2eme fonction :
+	is_move_left :
+		-Cette fonction verifie s'il reste des coups possible sur le plateau de
+			jeu en parcourant toutes les cases et en cherchant une case vide.
+			represente par '_'.
+3eme fonction :
+	evaluation :
+		-Cette fonction calcule une evaluation du plateau de jeu (b) en
+			fonction de l'etat actuel du jeu. Elle est utilisee pour evaluer
+			si un joueur est en position de victoire, de defaite ou si la 
+			partie est indecise.
+		-La boucle while(row < SIZE) parcourt chaque ligne du tableau.
+			Si tous les elements d'une ligne sont identiques et non vide :
+			1. Retourne +10 si c'est une ligne gagnante pour player.
+			2. retourne -10 si c'est une ligne gagnante pour opponent.
+		-La boucle while (col < SIZE) est la meme chose mais elle parcourt
+			les colonnes cette fois.
+		-Les 2 conditions if suivante verifie les deux diagonales principales.
+		-Retourne 0 si aucune victoire n'est detectee.
+4eme fonction :
+	minimax :
+		-Cette fonction implemente l'algorithme du meme nom, utilise pour determiner le meilleur mouvement.
+		-Parametre : board, depth qui correspond au niveau de profondeur
+			actuel dans l'arbre de recherche. Plus elle est elevee, plus on se trouve loin dans le futur de la partie.
+		-Dans les 3 premieres conditions on verifie si un joueur a gagne.
+		-le maximisateur (is_max == true) essaie d'obtenir la meilleure
+			evaluation possible.
+		-Pour chaque case vide '_' :
+			1. Il joue le coup(board[i][j] = player)
+			2. Appelle recursivement minimax pour le prochain niveau
+				avec le role inverse (!is_max).
+			3. Retablit l'etat original de la case (board[i][j] = '_')
+			3. Met a jour le meilleur score (best) si le coup actuel
+				ameliore la situation.
+		-Le minimisateur (is_max == false) essaie de rendre la situation
+			la moins favorable possible pour le maximisateur.
+		-La fonction est similaire au maximisateur, mais ici on minimise
+			la valeur de best.
+		-Principe : Le minimax explore toutes les combinaisons possibles de 	coups jusqu'a un etat terminal (win, lose, draw). 
+			Il revient ensuite en arriere (backtracking) pour calculer le score des etats intermediares et choisir le meilleur chemin pour le joueur actif.
+			A chaque niveau, minimax simule un coup et appelle recursivement
+			pour le coup suivant.
+		-Extra info (pour moi) : depth represente l'historique des coups
+			effectues depuis l'etat initial du jeu. La profondeur commence
+			a 0 et augmente de 1 a chaque appel recursif.
+5eme fonction :
+	play_tictac :
+		-Cette fonction gere le deroulement de la partie.
+		-La boucle while (!game_over(board) && move_index != SIDE * SIDE),
+			continue jusqu'a ce que le jeu soit termine ou nul.
+			1. !game_over(board) verifie si le jeu est termine.
+			2. move_index != SIDE * SIDE assure que le nombre de mouvement
+				n'a pas depasse le nombre de cases. (sinon c'est draw)
+		-La boucle if (whose_turn == COMPUTER) commence le tour de
+			l'ordinateur. 
+			1. Transformation du plateau.
+				Le plateau board est copie dans temp_board en remplacant 'X', 'O' par 'x' 'o'. Cela permet a la fonction find_best_move de travailler avec un tableau de petits caracteres.
+			2.Calcul le meilleur coup pour l'ordinateur.
+				find_best_move(temp_board) utilise minimax pour determiner le meilleur coup pour l'ordinateur.
+			3. placement du coup par l'ordinateur.
+				L'ordinateur place son coup sur le plateau et show_board(board)
+				est appele pour afficher le nouveau plateau apres ce mouvement.
+			4. Mise a jour du tour.
+				Apres que l'ordinateur ait joue, le tour passe au joueur.
+		-La boucle else if (whose_turn == HUMAN) commence le tour du joueur.
+			1. Demande du mouvement du joueur.
+				Le joueur entre un mouvement entre 1 et 9. Le code verifie que
+				celui ci est valide et que la case choisie est vide.
+				(board[x][y] == '_')
+			2. Conversion de l'entree en indices de ligne et colonne.
+				Le mouvement est transforme en coordonnees de ligne (x) et
+				colonne (y) en utilisant :
+				1- x = (moves - 1) / SIDE : Pour déterminer la ligne.
+				2- y = (moves - 1) % SIDE : Pour déterminer la colonne.
+			3. Validation du mouvement.
+				Si la case est vide, le joueur place son coup. Sinon, un
+				message est affiche pour indiquer que la case est occupee.
+			4. Verification de la fin du jeu.
+				Si un gagnant est trouve apres le coup, la fonction declare_winner(HUMAN) est appelee pour annoncer la victoire du
+				joueur humain.
+			5. Passage au tour de l'ordinateur.
+6eme fonction :
+	find_best_move :
+		-best_val sera utilisee pour stocker la valeur maximale des coups
+			possibles pour l'ordinateur. Elle est initialise a valeur tres basse (-1000), car l'ordinateur cherchera a maximiser cette
+			valeur.
+		-best_move, cette structure est utilisee pour stocker le meilleur
+			coup trouve. Elle contient deux champs (row, col) qui representent
+			les coordonnees du meilleur coup.
+		-Parcours de chaques cases.
+			1. move_val = minimax(board, 0, false); apres avoir joue dans la case, minimax est appele pour evaluer le coup. La profondeur de la
+			recherche est initialisee a 0, et false indique que c'est maintenant au tour du joueur humain.
+		-Mise a jour du meilleur coup.
+		 1. if (move_val > best_val), Si la valeur du coup actuel (move_val)
+		 	est meilleure que la meilleure valeur trouvee jusqu'a present, alors ce coup devient le meilleur coup.
