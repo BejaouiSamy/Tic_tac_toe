@@ -23,5 +23,6 @@
   - This is still a work in progress, so expect some rough edges.
   - The AI is unbeatable for now. You might want to practice a bit more… or just accept defeat gracefully. 😅
 
-
+  <p align="center">
   <img src="spongebob.gif" width="350" height="250" />
+  </p>
